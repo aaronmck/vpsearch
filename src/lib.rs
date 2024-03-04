@@ -373,6 +373,7 @@ impl<Item: MetricSpace<Impl> + Clone, Ownership, Impl> Tree<Item, Impl, Ownershi
                 }
             }
         }
+        println!("Leaving");
     }
 
     #[inline]
