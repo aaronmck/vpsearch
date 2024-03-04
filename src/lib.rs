@@ -344,7 +344,7 @@ impl<Item: MetricSpace<Impl> + Clone, Ownership, Impl> Tree<Item, Impl, Ownershi
         best_candidate.consider(node, distance, node.idx as usize, user_data);
 
         // Recurse towards most likely candidate first to narrow best candidate's distance as soon as possible
-        if distance < node.radius {
+        if distance <= node.radius {
             // No-node case uses out-of-bounds index, so this reuses a safe bounds check as the "null" check
             if let Some(near) = nodes.get(node.near as usize) {
                 println!("Searching near condition 1");
