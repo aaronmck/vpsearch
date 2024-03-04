@@ -3,6 +3,7 @@ use super::*;
 
 #[test]
 fn test_impl_orphan() {
+
     struct MyImpl;
     impl MetricSpace<MyImpl> for i32 {
         type UserData = ();

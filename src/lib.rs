@@ -113,7 +113,7 @@ pub trait MetricSpace<UserImplementationType = ()> {
 /// impl<Item: MetricSpace<Impl> + Clone> BestCandidate<Item, Impl> for ReturnByIndex<Item> {
 ///     type Output = (usize, Item::Distance);
 ///
-///     fn consider(&mut self, _: &Item, distance: Item::Distance, candidate_index: usize, _: &Item::UserData) {
+///     fn consider(&mut self, _: &Node<Item,Impl>, distance: Item::Distance, candidate_index: usize, _: &Item::UserData) {
 ///         if distance < self.distance {
 ///             self.distance = distance;
 ///             self.idx = candidate_index;
@@ -133,7 +133,7 @@ pub trait BestCandidate<Item: MetricSpace<Impl> + Clone, Impl> where Self: Sized
 
     /// This is a visitor method. If the given distance is smaller than previously seen, keep the item (or its index).
     /// `UserData` is the same as for `MetricSpace<Impl>`, and it's `()` by default.
-    fn consider(&mut self, item: &Item, distance: Item::Distance, candidate_index: usize, user_data: &Item::UserData);
+    fn consider(&mut self, node: &Node<Item,Impl>, distance: Item::Distance, candidate_index: usize, user_data: &Item::UserData);
 
     /// Minimum distance seen so far
     fn distance(&self) -> Item::Distance;
@@ -146,7 +146,7 @@ impl<Item: MetricSpace<Impl> + Clone, Impl> BestCandidate<Item, Impl> for Return
     type Output = (usize, Item::Distance);
 
     #[inline]
-    fn consider(&mut self, _: &Item, distance: Item::Distance, candidate_index: usize, _: &Item::UserData) {
+    fn consider(&mut self, _: &Node<Item,Impl>, distance: Item::Distance, candidate_index: usize, _: &Item::UserData) {
         if distance < self.distance {
             self.distance = distance;
             self.idx = candidate_index;
@@ -165,12 +165,20 @@ impl<Item: MetricSpace<Impl> + Clone, Impl> BestCandidate<Item, Impl> for Return
 
 const NO_NODE: u32 = u32::max_value();
 
-struct Node<Item: MetricSpace<Impl> + Clone, Impl> {
+pub struct Node<Item: MetricSpace<Impl> + Clone, Impl> {
     near: u32,
     far: u32,
     vantage_point: Item, // Pointer to the item (value) represented by the current node
     radius: Item::Distance,    // How far the `near` node stretches
     idx: u32,             // Index of the `vantage_point` in the original items array
+}
+
+impl<Item: MetricSpace<Impl> + Clone, Impl> Node<Item, Impl> {
+    pub fn get_value(&self) -> Item {
+        self.vantage_point.clone()
+    }
+
+    pub fn get_index(&self) -> u32 {self.idx}
 }
 
 /// The VP-Tree.
@@ -332,8 +340,8 @@ impl<Item: MetricSpace<Impl> + Clone, Ownership, Impl> Tree<Item, Impl, Ownershi
 
     fn search_node<B: BestCandidate<Item, Impl>>(node: &Node<Item, Impl>, nodes: &[Node<Item, Impl>], needle: &Item, best_candidate: &mut B, user_data: &Item::UserData) {
         let distance = needle.distance(&node.vantage_point, user_data);
-
-        best_candidate.consider(&node.vantage_point, distance, node.idx as usize, user_data);
+        println!("At node {}, children are {} and {}",node.idx, node.near, node.far);
+        best_candidate.consider(node, distance, node.idx as usize, user_data);
 
         // Recurse towards most likely candidate first to narrow best candidate's distance as soon as possible
         if distance < node.radius {
