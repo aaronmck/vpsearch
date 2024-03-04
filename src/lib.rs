@@ -340,7 +340,6 @@ impl<Item: MetricSpace<Impl> + Clone, Ownership, Impl> Tree<Item, Impl, Ownershi
 
     fn search_node<B: BestCandidate<Item, Impl>>(node: &Node<Item, Impl>, nodes: &[Node<Item, Impl>], needle: &Item, best_candidate: &mut B, user_data: &Item::UserData) {
         let distance = needle.distance(&node.vantage_point, user_data);
-        println!("At node {}, children are {} and {}",node.idx, node.near, node.far);
         best_candidate.consider(node, distance, node.idx as usize, user_data);
 
         // Recurse towards most likely candidate first to narrow best candidate's distance as soon as possible
@@ -360,7 +359,7 @@ impl<Item: MetricSpace<Impl> + Clone, Ownership, Impl> Tree<Item, Impl, Ownershi
                     Self::search_node(far, nodes, needle, best_candidate, user_data);
                 }
             }
-        } if distance >= node.radius {
+        } else {
             if let Some(far) = nodes.get(node.far as usize) {
                 println!("Searching far condition 2");
                 Self::search_node(far, nodes, needle, best_candidate, user_data);
