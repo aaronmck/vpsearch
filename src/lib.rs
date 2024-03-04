@@ -360,7 +360,7 @@ impl<Item: MetricSpace<Impl> + Clone, Ownership, Impl> Tree<Item, Impl, Ownershi
                     Self::search_node(far, nodes, needle, best_candidate, user_data);
                 }
             }
-        } else {
+        } if distance >= node.radius {
             if let Some(far) = nodes.get(node.far as usize) {
                 println!("Searching far condition 2");
                 Self::search_node(far, nodes, needle, best_candidate, user_data);
