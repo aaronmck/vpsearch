@@ -347,22 +347,28 @@ impl<Item: MetricSpace<Impl> + Clone, Ownership, Impl> Tree<Item, Impl, Ownershi
         if distance < node.radius {
             // No-node case uses out-of-bounds index, so this reuses a safe bounds check as the "null" check
             if let Some(near) = nodes.get(node.near as usize) {
+                println!("Searching near condition 1");
                 Self::search_node(near, nodes, needle, best_candidate, user_data);
             }
             // The best node (final answer) may be just ouside the radius, but not farther than
             // the best distance we know so far. The search_node above should have narrowed
             // best_candidate.distance, so this path is rarely taken.
             if let Some(far) = nodes.get(node.far as usize) {
+                println!("Searching far condition 1");
                 if distance + best_candidate.distance() >= node.radius {
+                    println!("Searching far condition 1: bounds met");
                     Self::search_node(far, nodes, needle, best_candidate, user_data);
                 }
             }
         } else {
             if let Some(far) = nodes.get(node.far as usize) {
+                println!("Searching far condition 2");
                 Self::search_node(far, nodes, needle, best_candidate, user_data);
             }
             if let Some(near) = nodes.get(node.near as usize) {
+                println!("Searching near condition 2");
                 if distance <= node.radius + best_candidate.distance() {
+                    println!("Searching near condition 2: bounds met");
                     Self::search_node(near, nodes, needle, best_candidate, user_data);
                 }
             }
